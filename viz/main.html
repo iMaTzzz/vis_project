@@ -5,10 +5,34 @@
 		<style type="text/css" media="screen, print">
 			body { margin: 30px 50px; font-family: sans-serif; }
 		</style>
-		<title>Viz project - Main implementation</title>
+		<title>France - Income 0, 50, 90, 100 percentiles</title>
 	</head>
 	<body>
-		<h1>Cars</h1>
+		<h1>France - Income 0, 50, 90, 100 percentiles</h1>
 
 		<script src="../vendor/d3-7.6.1/dist/d3.js"></script>
 		<script>
+
+async function processTSVFiles() {
+	const countriesMap = {};
+
+	const countriesData = await d3.tsv("../data/countries.tsv", d => (
+		{
+			code: d.code,
+			name: d.name,
+		}
+	));
+
+	countriesData.forEach((d) => countriesMap[d.code] = d.name);
+
+	console.log("countriesMap-----");
+	console.log(countriesMap);
+
+	// from now on, we have the mapping of countries' code and name in countriesMap
+}
+
+processTSVFiles();
+
+		</script>
+	</body>
+</html>
