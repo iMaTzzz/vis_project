@@ -13,7 +13,6 @@
 		<script src="../vendor/d3-7.6.1/dist/d3.js"></script>
 		<script>
 
-
 var margin = {top: 100, right: 100, bottom: 100, left: 100},
     width = 1000 - margin.left - margin.right,
     height = 800 - margin.top - margin.bottom;
@@ -23,6 +22,7 @@ var x = d3.scaleLinear()
 
 var yAvgInc = d3.scaleLinear()
     .range([height, 0]);
+		// .domain([0, 40000]); // for FR
 
 var yGiniIndex = d3.scaleLinear()
     .range([height, 0])
@@ -40,8 +40,6 @@ var svg = d3.select('body')
 
 
 async function processTSVFiles() {
-	const countriesMap = {};
-
 	const countriesData = await d3.tsv("../data/countries.tsv", d => (
 		{
 			code: d.code,
@@ -49,16 +47,20 @@ async function processTSVFiles() {
 		}
 	));
 
-	countriesData.forEach((d) => countriesMap[d.code] = d.name);
+	// one color by country
+	const color = d3.scaleSequential([0, countriesData.length - 1], d3.interpolateRainbow);
+
+	const countriesMap = {};
+	// set before everything to each country its color (according to its position in countriesData)
+	countriesData.forEach((d, i) => countriesMap[d.code] = { name: d.name, color: color(i) });
 
 	console.log("countriesMap-----");
 	console.log(countriesMap);
 
-	// from now on, we have the mapping of countries' code and name in countriesMap
 
 	const giniIndexData = await d3.tsv("../data/income_gini.tsv", d => (
 		{
-			code: d.code,
+			code: d.country,
 			year: +d.year,
 			gini_index: +d.gini_index,
 		}
@@ -66,7 +68,7 @@ async function processTSVFiles() {
 
 	const incAvgData = await d3.tsv("../data/income_averages.tsv", d => (
 		{
-			code: d.code,
+			code: d.country,
 			year: +d.year,
 			average: +d.average,
 		}
@@ -80,6 +82,7 @@ async function processTSVFiles() {
 
 	let concatenatedIncAndGini = incAvgData.concat(giniIndexData);
 	x.domain(d3.extent(concatenatedIncAndGini, d => d.year));
+	// x.domain([1965, 2020]); // for FR
 
 	yAvgInc.domain(d3.extent(incAvgData, d => d.average));
 
@@ -110,8 +113,8 @@ async function processTSVFiles() {
 		.attr('text-anchor', 'end');
 
 	svg.append('text')
-		.text("average income")
-		.attr('transform', `translate(-90, ${yAvgInc(yAvgInc.invert(0) / 1.5)}) rotate(-90)`)
+		.text("average income (€)")
+		.attr('transform', `translate(-80, ${yAvgInc(yAvgInc.invert(0) / 1.5)}) rotate(-90)`)
 		.attr('text-anchor', 'end');
 
 	svg.append('text')
@@ -120,11 +123,50 @@ async function processTSVFiles() {
 		.attr('text-anchor', 'middle');
 
 
-	/****** plot lines ******/
-	var ts = d3.line()
+	/****** plot both lines ******/
+
+	/****** plot average income line ******/
+	let incomesPerCountries = {};
+
+	for (let code in countriesMap) {
+		incomesPerCountries[code] = incAvgData.filter(d => d.code == code).map(d => ({ year: d.year, average: d.average }));
+	}
+
+	let tsAvgInc = d3.line()
 		.x(d => x(d.year))
-		.y(d => yAvgInc(d.average))
-		.y(d => yGiniIndex(d.gini_index)); // not sure here
+		.y(d => yAvgInc(d.average));
+
+	Object.entries(incomesPerCountries).forEach(([key, value]) => {
+		svg
+			.append('path')
+			.datum(value)
+			.attr('d', tsAvgInc)
+			.attr('stroke', countriesMap[key].color)
+			.attr('stroke-width', 1)
+			.attr('fill', 'none');
+	});
+
+	/****** plot gini index line ******/
+	let giniIndexPerCountries = {};
+
+	for (let code in countriesMap) {
+		giniIndexPerCountries[code] = giniIndexData.filter(d => d.code == code).map(d => ({ year: d.year, gini_index: d.gini_index }));
+	}
+
+	let tsGiniIndex = d3.line()
+		.x(d => x(d.year))
+		.y(d => yGiniIndex(d.gini_index));
+
+	Object.entries(giniIndexPerCountries).forEach(([key, value]) => {
+		svg
+			.append('path')
+			.datum(value)
+			.attr('d', tsGiniIndex)
+			.attr('stroke', countriesMap[key].code)
+			.attr('stroke-width', 1)
+			.attr('fill', 'none')
+			.attr('stroke-dasharray', '5,5');
+	});
 
 	// just for info: min and max years for average & gini tsv files
 	let min = d3.min(incAvgData, d => d.year);
