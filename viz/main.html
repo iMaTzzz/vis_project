@@ -157,12 +157,13 @@ async function processTSVFiles() {
 		.x(d => x(d.year))
 		.y(d => yGiniIndex(d.gini_index));
 
+	// .filter(([key, value]) => key == 'FR') // to filter only for France
 	Object.entries(giniIndexPerCountries).forEach(([key, value]) => {
 		svg
 			.append('path')
 			.datum(value)
 			.attr('d', tsGiniIndex)
-			.attr('stroke', countriesMap[key].code)
+			.attr('stroke', countriesMap[key].color)
 			.attr('stroke-width', 1)
 			.attr('fill', 'none')
 			.attr('stroke-dasharray', '5,5');
@@ -177,35 +178,35 @@ async function processTSVFiles() {
 	let max2 = d3.max(giniIndexData, d => d.year);
 	console.log("GINI--- min : ", min2, " -- max: ", max2);
 
-        // Add legend
-    const legend = svg.append('g')
-        .attr('class', 'legend')
-        .attr('transform', `translate(${width / 2 - 60},${height + 75})`);
+	// Add legend
+	const legend = svg.append('g')
+		.attr('class', 'legend')
+		.attr('transform', `translate(${width / 2 - 60},${height + 75})`);
 
-    legend.append('text')
-        .attr('x', -200)
-        .text('Average Income');
+	legend.append('text')
+		.attr('x', -200)
+		.text('Average Income');
 
-    legend.append('line')
-        .style("stroke", "black")
-        .style("stroke-width", 2)
-        .attr('x1', -250)
-        .attr('y1', -5)
-        .attr('x2', -220)
-        .attr('y2', -5);
+	legend.append('line')
+		.style("stroke", "black")
+		.style("stroke-width", 2)
+		.attr('x1', -250)
+		.attr('y1', -5)
+		.attr('x2', -220)
+		.attr('y2', -5);
 
-    legend.append('text')
-        .attr('x', 200)
-        .text('Gini Index');
+	legend.append('text')
+		.attr('x', 200)
+		.text('Gini Index');
 
-    legend.append('line')
-        .style("stroke-dasharray", ("3, 3"))
-        .style("stroke", "black")
-        .style("stroke-width", 2)
-        .attr('x1', 150)
-        .attr('y1', -5)
-        .attr('x2', 180)
-        .attr('y2', -5);
+	legend.append('line')
+		.style("stroke-dasharray", ("3, 3"))
+		.style("stroke", "black")
+		.style("stroke-width", 2)
+		.attr('x1', 150)
+		.attr('y1', -5)
+		.attr('x2', 180)
+		.attr('y2', -5);
 }
 
 processTSVFiles();
