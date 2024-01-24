@@ -13,7 +13,8 @@
 		<script src="../vendor/d3-7.6.1/dist/d3.js"></script>
 		<script>
 
-var margin = {top: 100, right: 100, bottom: 40, left: 100},
+
+var margin = {top: 50, right: 100, bottom: 40, left: 100},
     width = 800 - margin.left - margin.right,
     height = 600 - margin.top - margin.bottom;
 
@@ -27,11 +28,16 @@ var yGiniIndex = d3.scaleLinear()
     .range([height, 0])
     .domain([0, 1]);
 
-var svg = d3.select('body').append('svg')
+var svg = d3.select('body')
+		.append('div')
+		.style('margin-left', '20px')
+		.style('margin-bottom', '20px')
+		.append('svg')
     .attr('width', width + margin.left + margin.right)
     .attr('height', height + margin.top + margin.bottom)
   	.append('g')
     .attr('transform', `translate(${margin.left},${margin.top})`);
+
 
 async function processTSVFiles() {
 	const countriesMap = {};
@@ -95,11 +101,29 @@ async function processTSVFiles() {
 	svg.append('g')
 		.call(yAxis);
 
+	let maxAbsYear = x(d3.max(concatenatedIncAndGini, d => d.year));
+
 	// gini index (right) y-axis
 	var yAxis = d3.axisRight(yGiniIndex);
 	svg.append('g')
-		.attr('transform', `translate(${x(d3.max(concatenatedIncAndGini, d => d.year))+5})`)
+		.attr('transform', `translate(${maxAbsYear + 5})`)
 		.call(yAxis);
+
+	// add the 3 axis labels
+	svg.append('text')
+		.text("year")
+		.attr('transform', `translate(${maxAbsYear / 2}, ${yGiniIndex(0) + 40})`)
+		.attr('text-anchor', 'end');
+
+	svg.append('text')
+		.text("average income")
+		.attr('transform', `translate(-90, ${yAvgInc(yAvgInc.invert(0) / 1.5)}) rotate(-90)`)
+		.attr('text-anchor', 'end');
+
+	svg.append('text')
+		.text("gini index")
+		.attr('transform', `translate(${maxAbsYear + 60}, ${yGiniIndex(yGiniIndex.invert(0) / 1.75)}) rotate(90)`)
+		.attr('text-anchor', 'middle');
 
 
 	// just for info: min and max years for average & gini tsv files
