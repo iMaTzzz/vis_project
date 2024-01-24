@@ -13,6 +13,26 @@
 		<script src="../vendor/d3-7.6.1/dist/d3.js"></script>
 		<script>
 
+var margin = {top: 100, right: 100, bottom: 40, left: 100},
+    width = 800 - margin.left - margin.right,
+    height = 600 - margin.top - margin.bottom;
+
+var x = d3.scaleLinear()
+    .range([0, width]);
+
+var yAvgInc = d3.scaleLinear()
+    .range([height, 0]);
+
+var yGiniIndex = d3.scaleLinear()
+    .range([height, 0])
+    .domain([0, 1]);
+
+var svg = d3.select('body').append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+  	.append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
+
 async function processTSVFiles() {
 	const countriesMap = {};
 
@@ -29,6 +49,67 @@ async function processTSVFiles() {
 	console.log(countriesMap);
 
 	// from now on, we have the mapping of countries' code and name in countriesMap
+
+	const giniIndexData = await d3.tsv("../data/income_gini.tsv", d => (
+		{
+			code: d.code,
+			year: +d.year,
+			gini_index: +d.gini_index,
+		}
+	));
+
+	const incAvgData = await d3.tsv("../data/income_averages.tsv", d => (
+		{
+			code: d.code,
+			year: +d.year,
+			average: +d.average,
+		}
+	));
+
+	// let maxAvgIncYear = d3.max(incAvgData, d => d.year);
+	// let maxGiniIndexYear = d3.max(giniIndexData, d => d.year);
+
+	// let maxAbsoluteYear = Math.max(maxAvgIncYear, maxGiniIndexYear);
+	// console.log("maxAbsoluteYear: ", maxAbsoluteYear);
+
+	x.domain(d3.extent(incAvgData.concat(giniIndexData), d => d.year));
+
+	yAvgInc.domain(d3.extent(incAvgData, d => d.average));
+
+
+	var ts = d3.line()
+		.x(d => x(d.year))
+		.y(d => yAvgInc(d.average))
+		.y(d => yGiniIndex(d.gini_index)); // not sure here
+
+	// year x-axis
+	var xAxis = d3.axisBottom(x)
+		.tickFormat(d3.format('d'));
+	svg.append('g')
+		.attr('transform', `translate(0,${yAvgInc(0)+5})`)
+		.call(xAxis);
+
+	// average income (left) y-axis
+	var yAxis = d3.axisLeft(yAvgInc);
+	svg.append('g')
+		// .attr('transform', `translate(${x(d3.max(incAvgData, d => d.year))+5})`)
+		.call(yAxis);
+
+	// gini index (right) y-axis
+	var yAxis = d3.axisRight(yGiniIndex);
+	svg.append('g')
+		.attr('transform', `translate(${x(d3.max(incAvgData, d => d.year))+5})`)
+		.call(yAxis);
+
+
+	// just for info: min and max years for average & gini tsv files
+	let min = d3.min(incAvgData, d => d.year);
+	let max = d3.max(incAvgData, d => d.year);
+	console.log("AVERAGE--- min : ", min, " -- max: ", max);
+
+	let min2 = d3.min(giniIndexData, d => d.year);
+	let max2 = d3.max(giniIndexData, d => d.year);
+	console.log("GINI--- min : ", min2, " -- max: ", max2);
 }
 
 processTSVFiles();
