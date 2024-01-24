@@ -83,12 +83,6 @@ async function processTSVFiles() {
 
 	yAvgInc.domain(d3.extent(incAvgData, d => d.average));
 
-
-	var ts = d3.line()
-		.x(d => x(d.year))
-		.y(d => yAvgInc(d.average))
-		.y(d => yGiniIndex(d.gini_index)); // not sure here
-
 	// year x-axis
 	var xAxis = d3.axisBottom(x)
 		.tickFormat(d3.format('d'));
@@ -125,6 +119,12 @@ async function processTSVFiles() {
 		.attr('transform', `translate(${maxAbsYear + 60}, ${yGiniIndex(yGiniIndex.invert(0) / 1.75)}) rotate(90)`)
 		.attr('text-anchor', 'middle');
 
+
+	/****** plot lines ******/
+	var ts = d3.line()
+		.x(d => x(d.year))
+		.y(d => yAvgInc(d.average))
+		.y(d => yGiniIndex(d.gini_index)); // not sure here
 
 	// just for info: min and max years for average & gini tsv files
 	let min = d3.min(incAvgData, d => d.year);
