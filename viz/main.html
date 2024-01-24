@@ -72,7 +72,8 @@ async function processTSVFiles() {
 	// let maxAbsoluteYear = Math.max(maxAvgIncYear, maxGiniIndexYear);
 	// console.log("maxAbsoluteYear: ", maxAbsoluteYear);
 
-	x.domain(d3.extent(incAvgData.concat(giniIndexData), d => d.year));
+	let concatenatedIncAndGini = incAvgData.concat(giniIndexData);
+	x.domain(d3.extent(concatenatedIncAndGini, d => d.year));
 
 	yAvgInc.domain(d3.extent(incAvgData, d => d.average));
 
@@ -92,13 +93,12 @@ async function processTSVFiles() {
 	// average income (left) y-axis
 	var yAxis = d3.axisLeft(yAvgInc);
 	svg.append('g')
-		// .attr('transform', `translate(${x(d3.max(incAvgData, d => d.year))+5})`)
 		.call(yAxis);
 
 	// gini index (right) y-axis
 	var yAxis = d3.axisRight(yGiniIndex);
 	svg.append('g')
-		.attr('transform', `translate(${x(d3.max(incAvgData, d => d.year))+5})`)
+		.attr('transform', `translate(${x(d3.max(concatenatedIncAndGini, d => d.year))+5})`)
 		.call(yAxis);
 
 
