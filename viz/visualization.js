@@ -144,10 +144,16 @@ async function processTSVFiles() {
             selectedCountries.has(d.code)
         );
 
-        x.domain(d3.extent(filtered_concatenated_both_data.length ? filtered_concatenated_both_data : [1900, 2000], (d) => d.year));
+        x.domain(d3.extent(
+            filtered_concatenated_both_data.length ? filtered_concatenated_both_data : [{ year: 1900 }, { year: 2000 }],
+            (d) => d.year)
+        );
         // x.domain([1965, 2020]); // for FR
 
-        yAvgInc.domain(d3.extent(filtered_incAvgData.length ? filtered_incAvgData : [0, 10000], (d) => d.average));
+        yAvgInc.domain(d3.extent(
+            filtered_incAvgData.length ? filtered_incAvgData : [{ average: 0 }, { average: 10000 }],
+            (d) => d.average)
+        );
 
         // Remove the previous SVG element (if it exists)
         d3.select("svg").remove();
@@ -175,7 +181,10 @@ async function processTSVFiles() {
             svg.append("g").call(yAxisLeft);
         }
 
-        let maxAbsYear = x(d3.max(filtered_concatenated_both_data.length ? filtered_concatenated_both_data : [1900, 2000], (d) => d.year));
+        let maxAbsYear = x(d3.max(
+            filtered_concatenated_both_data.length ? filtered_concatenated_both_data : [{ year: 2000 }],
+            (d) => d.year)
+        );
 
         // gini index (right) y-axis
         if (selectedLines == LinesToShow.GINI || selectedLines == LinesToShow.BOTH) {
