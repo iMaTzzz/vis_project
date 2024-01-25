@@ -166,16 +166,20 @@ async function processTSVFiles() {
             .call(xAxis);
 
         // average income (left) y-axis
-        let yAxisLeft = d3.axisLeft(yAvgInc);
-        svg.append("g").call(yAxisLeft);
+        if (selectedLines == LinesToShow.AVG_INC || selectedLines == LinesToShow.BOTH) {
+            let yAxisLeft = d3.axisLeft(yAvgInc);
+            svg.append("g").call(yAxisLeft);
+        }
 
         let maxAbsYear = x(d3.max(filtered_concatenated_both_data.length ? filtered_concatenated_both_data : [1900, 2000], (d) => d.year));
 
         // gini index (right) y-axis
-        let yAxisRight = d3.axisRight(yGiniIndex);
-        svg.append("g")
-            .attr("transform", `translate(${maxAbsYear + 5})`)
-            .call(yAxisRight);
+        if (selectedLines == LinesToShow.GINI || selectedLines == LinesToShow.BOTH) {
+            let yAxisRight = d3.axisRight(yGiniIndex);
+            svg.append("g")
+                .attr("transform", `translate(${maxAbsYear + 5})`)
+                .call(yAxisRight);
+        }
 
         // add the 3 axis labels
         svg.append("text")
@@ -186,25 +190,29 @@ async function processTSVFiles() {
             )
             .attr("text-anchor", "end");
 
-        svg.append("text")
-            .text("Average income (€)")
-            .attr(
-                "transform",
-                `translate(-80, ${yGiniIndex(
-                    yGiniIndex.invert(0) / 1.5
-                )}) rotate(-90)`
-            )
-            .attr("text-anchor", "end");
+        if (selectedLines == LinesToShow.AVG_INC || selectedLines == LinesToShow.BOTH) {
+            svg.append("text")
+                .text("Average income (€)")
+                .attr(
+                    "transform",
+                    `translate(-80, ${yGiniIndex(
+                        yGiniIndex.invert(0) / 1.5
+                    )}) rotate(-90)`
+                )
+                .attr("text-anchor", "end");
+        }
 
-        svg.append("text")
-            .text("Gini index of income")
-            .attr(
-                "transform",
-                `translate(${maxAbsYear + 60}, ${yGiniIndex(
-                    yGiniIndex.invert(0) / 1.75
-                )}) rotate(90)`
-            )
-            .attr("text-anchor", "middle");
+        if (selectedLines == LinesToShow.GINI || selectedLines == LinesToShow.BOTH) {
+            svg.append("text")
+                .text("Gini index of income")
+                .attr(
+                    "transform",
+                    `translate(${maxAbsYear + 60}, ${yGiniIndex(
+                        yGiniIndex.invert(0) / 1.75
+                    )}) rotate(90)`
+                )
+                .attr("text-anchor", "middle");
+        }
 
         if (selectedLines == LinesToShow.AVG_INC || selectedLines == LinesToShow.BOTH) {
             Object.entries(incomesPerCountries)
@@ -235,33 +243,33 @@ async function processTSVFiles() {
         }
 
         // Add legend
-        const legend = svg
-            .append("g")
-            .attr("class", "legend")
-            .attr("transform", `translate(${width / 2 - 60},${height + 75})`);
+        if (selectedLines == LinesToShow.BOTH) {
+            const legend = svg
+                .append("g")
+                .attr("class", "legend")
+                .attr("transform", `translate(${width / 2 - 60},${height + 75})`);
 
-        legend.append("text").attr("x", -200).text("Average Income");
+            legend.append("text").attr("x", -200).text("Average Income");
+            legend
+                .append("line")
+                .style("stroke", "black")
+                .style("stroke-width", 2)
+                .attr("x1", -250)
+                .attr("y1", -5)
+                .attr("x2", -220)
+                .attr("y2", -5);
 
-        legend
-            .append("line")
-            .style("stroke", "black")
-            .style("stroke-width", 2)
-            .attr("x1", -250)
-            .attr("y1", -5)
-            .attr("x2", -220)
-            .attr("y2", -5);
-
-        legend.append("text").attr("x", 200).text("Gini Index");
-
-        legend
-            .append("line")
-            .style("stroke-dasharray", "3, 3")
-            .style("stroke", "black")
-            .style("stroke-width", 2)
-            .attr("x1", 150)
-            .attr("y1", -5)
-            .attr("x2", 180)
-            .attr("y2", -5);
+            legend.append("text").attr("x", 200).text("Gini Index");
+            legend
+                .append("line")
+                .style("stroke-dasharray", "5, 5")
+                .style("stroke", "black")
+                .style("stroke-width", 2)
+                .attr("x1", 150)
+                .attr("y1", -5)
+                .attr("x2", 180)
+                .attr("y2", -5);
+        }
     }
 
     updateDisplayedData();
