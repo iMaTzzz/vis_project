@@ -55,6 +55,20 @@ async function processTSVFiles() {
         });
     });
 
+    // Reset filter button
+    document.getElementById("resetFilterButton").addEventListener("click", () => {
+        var checkboxContainers = document.querySelectorAll(
+            "div#checkboxContainer"
+        );
+        checkboxContainers.forEach((checkboxContainer) => {
+            const checkbox = checkboxContainer.querySelector("input");
+            checkbox.checked = false; // Uncheck all checkboxes
+        });
+        selectedCountries.clear(); // Clear selected countries set
+        console.log(selectedCountries); // Log selected countries (should be empty)
+        updateDisplayedData();
+    });
+
     // Check the checkbox for France by default
     const franceCheckbox = document.querySelector("#checkboxContainer input[value='FR']");
     franceCheckbox.checked = true;
@@ -80,7 +94,7 @@ async function processTSVFiles() {
     };
 
     const selectedLinesElem = document.getElementById("showLinesContainer");
-    let selectedLines = LinesToShow.BOTH; // initialize with both lines
+    let selectedLines = selectedLinesElem.value;
 
     selectedLinesElem.addEventListener("change", () => {
         selectedLines = selectedLinesElem.value;
@@ -130,6 +144,7 @@ async function processTSVFiles() {
             countriesColorMap[countryCode] = color(i);
             i++;
         })
+        console.log(countriesColorMap);
         const filtered_incAvgData = incAvgData.filter((d) =>
             selectedCountries.has(d.code)
         );
@@ -288,9 +303,6 @@ window.addEventListener("load", () => {
             const label = checkboxContainer.querySelector("label");
             const countryName = label.innerText.toLowerCase();
 
-            const checkbox = checkboxContainer.querySelector("input");
-            const countryCode = checkbox.value;
-
             // Check if the country name contains the search text
             if (countryName.includes(searchText)) {
                 checkboxContainer.style.display = "flex"; // Show checkbox
@@ -299,4 +311,5 @@ window.addEventListener("load", () => {
             }
         });
     });
+
 });
