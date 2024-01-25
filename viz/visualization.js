@@ -17,17 +17,11 @@ async function processTSVFiles() {
         name: d.name,
     }));
 
-    // one color by country
-    const color = d3.scaleSequential(
-        [0, countriesData.length - 1],
-        d3.interpolateRainbow
-    );
-
     const countriesMap = {};
 
-    countriesData.forEach((d, i) => {
+    countriesData.forEach((d) => {
         // set (before everything else) a color to each country (according to its position in countriesData)
-        countriesMap[d.code] = { name: d.name, color: color(i) }
+        countriesMap[d.code] = {name: d.name}
 
         const form = document.getElementById("countryForm");
         const checkboxContainer = document.createElement("div");
@@ -126,6 +120,19 @@ async function processTSVFiles() {
      * function called every dynamic change to update the display
      */
     const updateDisplayedData = () => {
+        const color = d3.scaleSequential(
+            [0, selectedCountries.size - 1],
+            d3.interpolateRainbow
+        );
+        const countriesColorMap = {}
+        console.log("countriesColorMap");
+        let i = 0;
+        selectedCountries.forEach((countryCode) => {
+            countriesColorMap[countryCode] = color(i);
+            i++;
+        })
+        console.log("countriesColorMap");
+        console.log(countriesColorMap);
         console.log('selectedCountries--');
         console.log(selectedCountries);
         const filtered_incAvgData = incAvgData.filter((d) =>
@@ -213,7 +220,7 @@ async function processTSVFiles() {
                 svg.append("path")
                     .datum(value)
                     .attr("d", tsAvgInc)
-                    .attr("stroke", countriesMap[key].color)
+                    .attr("stroke", countriesColorMap[key])
                     .attr("stroke-width", 1)
                     .attr("fill", "none");
             });
@@ -227,7 +234,7 @@ async function processTSVFiles() {
                 svg.append("path")
                     .datum(value)
                     .attr("d", tsGiniIndex)
-                    .attr("stroke", countriesMap[key].color)
+                    .attr("stroke", countriesColorMap[key])
                     .attr("stroke-width", 1)
                     .attr("fill", "none")
                     .attr("stroke-dasharray", "5,5");
