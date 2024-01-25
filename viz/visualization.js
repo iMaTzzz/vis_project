@@ -1,15 +1,15 @@
 const selectedCountries = new Set();
 
-var margin = { top: 100, right: 100, bottom: 100, left: 100 },
+let margin = { top: 100, right: 100, bottom: 100, left: 100 },
     width = 1000 - margin.left - margin.right,
     height = 800 - margin.top - margin.bottom;
 
-var x = d3.scaleLinear().range([0, width]);
+let x = d3.scaleLinear().range([0, width]);
 
-var yAvgInc = d3.scaleLinear().range([height, 0]);
+let yAvgInc = d3.scaleLinear().range([height, 0]);
 // .domain([0, 40000]); // for FR
 
-var yGiniIndex = d3.scaleLinear().range([height, 0]).domain([0, 1]);
+let yGiniIndex = d3.scaleLinear().range([height, 0]);
 
 async function processTSVFiles() {
     const countriesData = await d3.tsv("../data/countries.tsv", (d) => ({
@@ -146,6 +146,10 @@ async function processTSVFiles() {
             selectedCountries.has(d.code)
         );
 
+        const filtered_giniIndexData = giniIndexData.filter((d) =>
+            selectedCountries.has(d.code)
+        );
+
         let concatenatedIncAndGini = incAvgData.concat(giniIndexData);
         let filtered_concatenated_both_data = concatenatedIncAndGini.filter((d) =>
             selectedCountries.has(d.code)
@@ -153,13 +157,23 @@ async function processTSVFiles() {
 
         x.domain(d3.extent(
             filtered_concatenated_both_data.length ? filtered_concatenated_both_data : [{ year: 1900 }, { year: 2000 }],
-            (d) => d.year)
-        );
+            (d) => d.year
+        ));
         // x.domain([1965, 2020]); // for FR
 
         yAvgInc.domain(d3.extent(
             filtered_incAvgData.length ? filtered_incAvgData : [{ average: 0 }, { average: 10000 }],
-            (d) => d.average)
+            (d) => d.average
+        ));
+
+        yGiniIndex.domain(d3.extent(
+            filtered_giniIndexData.length ? filtered_giniIndexData : [{ gini_index: 0 }, { gini_index: 1 }],
+            (d) => d.gini_index
+        ));
+
+        let minGiniIndex = d3.min(
+            filtered_giniIndexData.length ? filtered_giniIndexData : [{ gini_index: 0 }],
+            (d) => d.gini_index
         );
 
         // Remove the previous SVG element (if it exists)
@@ -179,7 +193,7 @@ async function processTSVFiles() {
         // year x-axis
         let xAxis = d3.axisBottom(x).tickFormat(d3.format("d"));
         svg.append("g")
-            .attr("transform", `translate(0,${yGiniIndex(0) + 5})`)
+            .attr("transform", `translate(0,${yGiniIndex(minGiniIndex) + 5})`)
             .call(xAxis);
 
         // average income (left) y-axis
@@ -212,12 +226,10 @@ async function processTSVFiles() {
 
         if (selectedLines == LinesToShow.AVG_INC || selectedLines == LinesToShow.BOTH) {
             svg.append("text")
-                .text("Average income (€)")
+                .text("Average income")
                 .attr(
                     "transform",
-                    `translate(-80, ${yGiniIndex(
-                        yGiniIndex.invert(0) / 1.5
-                    )}) rotate(-90)`
+                    `translate(-80, 220) rotate(-90)`
                 )
                 .attr("text-anchor", "end");
         }
@@ -227,9 +239,7 @@ async function processTSVFiles() {
                 .text("Gini index of income")
                 .attr(
                     "transform",
-                    `translate(${maxAbsYear + 60}, ${yGiniIndex(
-                        yGiniIndex.invert(0) / 1.75
-                    )}) rotate(90)`
+                    `translate(${maxAbsYear + 60}, 275) rotate(90)`
                 )
                 .attr("text-anchor", "middle");
         }
