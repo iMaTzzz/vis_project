@@ -84,11 +84,12 @@ async function processTSVFiles() {
         GINI: 1,
         BOTH: 2,
     };
+
     const selectedLinesElem = document.getElementById("showLinesContainer");
     let selectedLines = selectedLinesElem.value;
+
     selectedLinesElem.addEventListener("change", () => {
         selectedLines = selectedLinesElem.value;
-        console.log("Selected value:", selectedLines);
         updateDisplayedData();
     });
 
@@ -121,19 +122,13 @@ async function processTSVFiles() {
         .y((d) => yGiniIndex(d.gini_index));
 
 
-
     /**
      * function called every dynamic change to update the display
      */
     const updateDisplayedData = () => {
-        console.log('selectedCountries--');
-        console.log(selectedCountries);
         const filtered_incAvgData = incAvgData.filter((d) =>
             selectedCountries.has(d.code)
         );
-
-        console.log('filtered_incAvgData--');
-        console.log(filtered_incAvgData);
 
         let concatenatedIncAndGini = incAvgData.concat(giniIndexData);
         let filtered_concatenated_both_data = concatenatedIncAndGini.filter((d) =>
