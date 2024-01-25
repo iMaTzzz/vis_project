@@ -94,7 +94,7 @@ async function processTSVFiles() {
     };
 
     const selectedLinesElem = document.getElementById("showLinesContainer");
-    let selectedLines = selectedLinesElem.value;
+    let selectedLines = LinesToShow.BOTH;
 
     selectedLinesElem.addEventListener("change", () => {
         selectedLines = selectedLinesElem.value;
