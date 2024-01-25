@@ -1,0 +1,28 @@
+body {
+    margin: 30px 50px;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+}
+#svgContainer {
+    margin-right: 20px;
+}
+#formContainer {
+    width: 100%;
+}
+#countryForm {
+    max-height: 700px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+#searchBar {
+    margin-bottom: 10px;
+}
