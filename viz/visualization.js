@@ -61,12 +61,14 @@ async function processTSVFiles() {
     const checkboxes = document.querySelectorAll("input[type='checkbox']");
     checkboxes.forEach((checkbox) => {
         checkbox.addEventListener("change", (event) => {
+            console.log('---- dans event list- ---')
             const countryCode = event.target.value;
             if (event.target.checked) {
                 selectedCountries.add(countryCode); // Add country code if checkbox is checked
             } else {
                 selectedCountries.delete(countryCode); // Delete country code if checkbox is unchecked
             }
+            updateDisplayedData();
         });
     });
 
@@ -86,64 +88,6 @@ async function processTSVFiles() {
         year: +d.year,
         average: +d.average,
     }));
-    const filtered_incAvgData = incAvgData.filter((d) =>
-        selectedCountries.has(d.code)
-    );
-
-    let concatenatedIncAndGini = incAvgData.concat(giniIndexData);
-    let filtered_concatenated_both_data = concatenatedIncAndGini.filter((d) =>
-        selectedCountries.has(d.code)
-    );
-
-    x.domain(d3.extent(filtered_concatenated_both_data.length ? filtered_concatenated_both_data : [1900, 2000], (d) => d.year));
-    // x.domain([1965, 2020]); // for FR
-
-    yAvgInc.domain(d3.extent(filtered_incAvgData.length ? filtered_incAvgData : [0, 10000], (d) => d.average));
-
-    // year x-axis
-    var xAxis = d3.axisBottom(x).tickFormat(d3.format("d"));
-    svg.append("g")
-        .attr("transform", `translate(0,${yGiniIndex(0) + 5})`)
-        .call(xAxis);
-
-    // average income (left) y-axis
-    var yAxis = d3.axisLeft(yAvgInc);
-    svg.append("g").call(yAxis);
-
-    let maxAbsYear = x(d3.max(filtered_concatenated_both_data.length ? filtered_concatenated_both_data : [1900, 2000], (d) => d.year));
-
-    // gini index (right) y-axis
-    var yAxis = d3.axisRight(yGiniIndex);
-    svg.append("g")
-        .attr("transform", `translate(${maxAbsYear + 5})`)
-        .call(yAxis);
-
-    // add the 3 axis labels
-    svg.append("text")
-        .text("Year")
-        .attr(
-            "transform",
-            `translate(${maxAbsYear / 2}, ${yGiniIndex(0) + 40})`
-        )
-        .attr("text-anchor", "end");
-
-    svg.append("text")
-        .text("Average income (€)")
-        .attr(
-            "transform",
-            `translate(-80, ${yAvgInc(yAvgInc.invert(0) / 1.5)}) rotate(-90)`
-        )
-        .attr("text-anchor", "end");
-
-    svg.append("text")
-        .text("Gini index of income")
-        .attr(
-            "transform",
-            `translate(${maxAbsYear + 60}, ${yGiniIndex(
-                yGiniIndex.invert(0) / 1.75
-            )}) rotate(90)`
-        )
-        .attr("text-anchor", "middle");
 
     /****** plot both lines ******/
     const LinesToShow = {
@@ -158,7 +102,7 @@ async function processTSVFiles() {
         console.log("Selected value:", selectedLines);
     });
 
-    /****** plot average income line ******/
+    /****** store incomes (with corresponding year) per country in map ******/
     let incomesPerCountries = {};
 
     for (let code in countriesMap) {
@@ -172,20 +116,7 @@ async function processTSVFiles() {
         .x((d) => x(d.year))
         .y((d) => yAvgInc(d.average));
 
-    // if (selectedLines == LinesToShow.AVG_INC || selectedLines == LinesToShow.BOTH) {
-        Object.entries(incomesPerCountries)
-            .filter(([key]) => selectedCountries.has(key))
-            .forEach(([key, value]) => {
-                svg.append("path")
-                    .datum(value)
-                    .attr("d", tsAvgInc)
-                    .attr("stroke", countriesMap[key].color)
-                    .attr("stroke-width", 1)
-                    .attr("fill", "none");
-            });
-    // }
-
-    /****** plot gini index line ******/
+    /****** store gini index (with corresponding year) per country in map ******/
     let giniIndexPerCountries = {};
 
     for (let code in countriesMap) {
@@ -199,29 +130,119 @@ async function processTSVFiles() {
         .x((d) => x(d.year))
         .y((d) => yGiniIndex(d.gini_index));
 
-    // .filter(([key, value]) => key == 'FR') // to filter only for France
-    // if (selectedLines == LinesToShow.GINI || selectedLines == LinesToShow.BOTH) {
-        Object.entries(giniIndexPerCountries)
-        .filter(([key]) => selectedCountries.has(key))
-        .forEach(([key, value]) => {
-            svg.append("path")
-                .datum(value)
-                .attr("d", tsGiniIndex)
-                .attr("stroke", countriesMap[key].color)
-                .attr("stroke-width", 1)
-                .attr("fill", "none")
-                .attr("stroke-dasharray", "5,5");
-        });
-    // }
+
+
+    /**
+     * function called every dynamic change to update the display
+     */
+
+    const updateDisplayedData = () => {
+        console.log('selectedCountries--');
+        console.log(selectedCountries);
+        const filtered_incAvgData = incAvgData.filter((d) =>
+            selectedCountries.has(d.code)
+        );
+
+        console.log('filtered_incAvgData--');
+        console.log(filtered_incAvgData);
+
+        let concatenatedIncAndGini = incAvgData.concat(giniIndexData);
+        let filtered_concatenated_both_data = concatenatedIncAndGini.filter((d) =>
+            selectedCountries.has(d.code)
+        );
+
+        x.domain(d3.extent(filtered_concatenated_both_data.length ? filtered_concatenated_both_data : [1900, 2000], (d) => d.year));
+        // x.domain([1965, 2020]); // for FR
+
+        yAvgInc.domain(d3.extent(filtered_incAvgData.length ? filtered_incAvgData : [0, 10000], (d) => d.average));
+
+        // year x-axis
+        let xAxis = d3.axisBottom(x).tickFormat(d3.format("d"));
+        svg.append("g")
+            .attr("transform", `translate(0,${yGiniIndex(0) + 5})`)
+            .call(xAxis);
+
+        // average income (left) y-axis
+        let yAxisLeft = d3.axisLeft(yAvgInc);
+        svg.append("g").call(yAxisLeft);
+
+        let maxAbsYear = x(d3.max(filtered_concatenated_both_data.length ? filtered_concatenated_both_data : [1900, 2000], (d) => d.year));
+
+        // gini index (right) y-axis
+        let yAxisRight = d3.axisRight(yGiniIndex);
+        svg.append("g")
+            .attr("transform", `translate(${maxAbsYear + 5})`)
+            .call(yAxisRight);
+
+        // add the 3 axis labels
+        svg.append("text")
+            .text("Year")
+            .attr(
+                "transform",
+                `translate(${maxAbsYear / 2}, ${yGiniIndex(0) + 40})`
+            )
+            .attr("text-anchor", "end");
+
+        svg.append("text")
+            .text("Average income (€)")
+            .attr(
+                "transform",
+                `translate(-80, ${yGiniIndex(
+                    yGiniIndex.invert(0) / 1.5
+                )}) rotate(-90)`
+            )
+            .attr("text-anchor", "end");
+
+        svg.append("text")
+            .text("Gini index of income")
+            .attr(
+                "transform",
+                `translate(${maxAbsYear + 60}, ${yGiniIndex(
+                    yGiniIndex.invert(0) / 1.75
+                )}) rotate(90)`
+            )
+            .attr("text-anchor", "middle");
+
+        // if (selectedLines == LinesToShow.AVG_INC || selectedLines == LinesToShow.BOTH) {
+            Object.entries(incomesPerCountries)
+            .filter(([key]) => selectedCountries.has(key))
+            .forEach(([key, value]) => {
+                svg.append("path")
+                    .datum(value)
+                    .attr("d", tsAvgInc)
+                    .attr("stroke", countriesMap[key].color)
+                    .attr("stroke-width", 1)
+                    .attr("fill", "none");
+            });
+        // }
+
+        // .filter(([key, value]) => key == 'FR') // to filter only for France
+        // if (selectedLines == LinesToShow.GINI || selectedLines == LinesToShow.BOTH) {
+            Object.entries(giniIndexPerCountries)
+            .filter(([key]) => selectedCountries.has(key))
+            .forEach(([key, value]) => {
+                svg.append("path")
+                    .datum(value)
+                    .attr("d", tsGiniIndex)
+                    .attr("stroke", countriesMap[key].color)
+                    .attr("stroke-width", 1)
+                    .attr("fill", "none")
+                    .attr("stroke-dasharray", "5,5");
+            });
+        // }
+    }
+
+    updateDisplayedData();
+
 
     // just for info: min and max years for average & gini tsv files
-    let min = d3.min(incAvgData, (d) => d.year);
-    let max = d3.max(incAvgData, (d) => d.year);
-    console.log("AVERAGE--- min : ", min, " -- max: ", max);
+    // let min = d3.min(incAvgData, (d) => d.year);
+    // let max = d3.max(incAvgData, (d) => d.year);
+    // console.log("AVERAGE--- min : ", min, " -- max: ", max);
 
-    let min2 = d3.min(giniIndexData, (d) => d.year);
-    let max2 = d3.max(giniIndexData, (d) => d.year);
-    console.log("GINI--- min : ", min2, " -- max: ", max2);
+    // let min2 = d3.min(giniIndexData, (d) => d.year);
+    // let max2 = d3.max(giniIndexData, (d) => d.year);
+    // console.log("GINI--- min : ", min2, " -- max: ", max2);
 
     // Add legend
     const legend = svg
