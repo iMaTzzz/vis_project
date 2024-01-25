@@ -121,20 +121,15 @@ async function processTSVFiles() {
      */
     const updateDisplayedData = () => {
         const color = d3.scaleSequential(
-            [0, selectedCountries.size - 1],
+            [0, selectedCountries.size],
             d3.interpolateRainbow
         );
         const countriesColorMap = {}
-        console.log("countriesColorMap");
         let i = 0;
         selectedCountries.forEach((countryCode) => {
             countriesColorMap[countryCode] = color(i);
             i++;
         })
-        console.log("countriesColorMap");
-        console.log(countriesColorMap);
-        console.log('selectedCountries--');
-        console.log(selectedCountries);
         const filtered_incAvgData = incAvgData.filter((d) =>
             selectedCountries.has(d.code)
         );
