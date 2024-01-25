@@ -2,17 +2,44 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<style type="text/css" media="screen, print">
-			body { margin: 30px 50px; font-family: sans-serif; }
-		</style>
+        <style type="text/css" media="screen, print">
+            body {
+                margin: 30px 50px;
+                font-family: sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            #container {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+                margin-top: 20px;
+            }
+            #svgContainer {
+                margin-right: 20px;
+            }
+            #formContainer {
+                width: 100%;
+            }
+            #countryForm {
+                max-height: 700px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+            #searchBar {
+                margin-bottom: 10px;
+            }
+        </style>
 		<title>Information Visualization project</title>
 	</head>
 	<body>
 		<h1>Global wealth dynamics: Unraveling the evolution and inequality trends</h1>
-
-		<script src="../vendor/d3-7.6.1/dist/d3.js"></script>
-		<script>
-
+        <div id="container">
+            <div id="svgContainer">
+                <script src="../vendor/d3-7.6.1/dist/d3.js"></script>
+                <script defer>
 var margin = {top: 100, right: 100, bottom: 100, left: 100},
     width = 1000 - margin.left - margin.right,
     height = 800 - margin.top - margin.bottom;
@@ -28,7 +55,7 @@ var yGiniIndex = d3.scaleLinear()
     .range([height, 0])
     .domain([0, 1]);
 
-var svg = d3.select('body')
+var svg = d3.select('#svgContainer')
 		.append('div')
 		.style('margin-left', '20px')
 		.style('margin-bottom', '20px')
@@ -53,6 +80,25 @@ async function processTSVFiles() {
 	const countriesMap = {};
 	// set before everything to each country its color (according to its position in countriesData)
 	countriesData.forEach((d, i) => countriesMap[d.code] = { name: d.name, color: color(i) });
+	countriesData.forEach((d, i) => {
+        const form = document.getElementById("countryForm");
+        const checkboxContainer = document.createElement('div');
+        checkboxContainer.id = "checkboxContainer";
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `country${d.code}`;
+        checkbox.name = 'countries[]';
+        checkbox.value = d.code;
+
+        const label = document.createElement('label');
+        label.htmlFor = `country${d.code}`;
+        label.appendChild(document.createTextNode(d.name));
+
+        checkboxContainer.appendChild(checkbox);
+        checkboxContainer.appendChild(label);
+        checkboxContainer.appendChild(document.createElement('br'));
+        form.appendChild(checkboxContainer);
+    });
 
 	console.log("countriesMap-----");
 	console.log(countriesMap);
@@ -165,7 +211,7 @@ async function processTSVFiles() {
 			.attr('stroke', countriesMap[key].code)
 			.attr('stroke-width', 1)
 			.attr('fill', 'none')
-			.attr('stroke-dasharray', '5,5');
+			.attr('stroke-dasharray', ('5,5'));
 	});
 
 	// just for info: min and max years for average & gini tsv files
@@ -210,6 +256,32 @@ async function processTSVFiles() {
 
 processTSVFiles();
 
-		</script>
+// Filter countries based on search input
+window.onload = function () {
+    document.getElementById('searchBar').addEventListener('input', function () {
+        var searchText = this.value.toLowerCase();
+        var checkboxContainers = document.querySelectorAll("div#checkboxContainer");
+
+        checkboxContainers.forEach(function (checkboxContainer) {
+            const label = checkboxContainer.querySelector('label');
+            const countryName = label.innerText.toLowerCase();
+
+            // Check if the country name contains the search text
+            if (countryName.includes(searchText)) {
+                checkboxContainer.style.display = "flex"; // Show checkbox
+            } else {
+                checkboxContainer.style.display = "none"; // Hide checkbox
+            }
+        });
+    });
+}
+                </script>
+            </div>
+            <div id="formContainer">
+                <input type="text" id="searchBar" placeholder="Search countries...">
+                <form id="countryForm"></form>
+            </div>
+        </div>
+
 	</body>
 </html>
