@@ -232,9 +232,7 @@ async function processTSVFiles() {
                 .text("Average income (€)")
                 .attr(
                     "transform",
-                    `translate(-80, ${yGiniIndex(
-                        yGiniIndex.invert(0) / 1.5
-                    )}) rotate(-90)`
+                    `translate(-80, 220) rotate(-90)`
                 )
                 .attr("text-anchor", "end");
         }
@@ -244,9 +242,7 @@ async function processTSVFiles() {
                 .text("Gini index of income")
                 .attr(
                     "transform",
-                    `translate(${maxAbsYear + 60}, ${yGiniIndex(
-                        yGiniIndex.invert(0) / 1.75
-                    )}) rotate(90)`
+                    `translate(${maxAbsYear + 60}, 275) rotate(90)`
                 )
                 .attr("text-anchor", "middle");
         }
