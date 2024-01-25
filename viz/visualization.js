@@ -33,11 +33,11 @@ async function processTSVFiles() {
     );
 
     const countriesMap = {};
-    // set (before everything else) a color to each country (according to its position in countriesData)
-    countriesData.forEach(
-        (d, i) => (countriesMap[d.code] = { name: d.name, color: color(i) })
-    );
+
     countriesData.forEach((d, i) => {
+        // set (before everything else) a color to each country (according to its position in countriesData)
+        countriesMap[d.code] = { name: d.name, color: color(i) }
+
         const form = document.getElementById("countryForm");
         const checkboxContainer = document.createElement("div");
         checkboxContainer.id = "checkboxContainer";
