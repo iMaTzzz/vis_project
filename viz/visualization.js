@@ -146,6 +146,17 @@ async function processTSVFiles() {
         .attr("text-anchor", "middle");
 
     /****** plot both lines ******/
+    const LinesToShow = {
+        AVG_INC: 0,
+        GINI: 1,
+        BOTH: 2,
+    };
+    const selectedLinesElem = document.getElementById("showLinesContainer");
+    let selectedLines = selectedLinesElem.value;
+    selectedLinesElem.addEventListener("change", () => {
+        selectedLines = selectedLinesElem.value;
+        console.log("Selected value:", selectedLines);
+    });
 
     /****** plot average income line ******/
     let incomesPerCountries = {};
@@ -161,16 +172,18 @@ async function processTSVFiles() {
         .x((d) => x(d.year))
         .y((d) => yAvgInc(d.average));
 
-    Object.entries(incomesPerCountries)
-        .filter(([key]) => selectedCountries.has(key))
-        .forEach(([key, value]) => {
-            svg.append("path")
-                .datum(value)
-                .attr("d", tsAvgInc)
-                .attr("stroke", countriesMap[key].color)
-                .attr("stroke-width", 1)
-                .attr("fill", "none");
-        });
+    // if (selectedLines == LinesToShow.AVG_INC || selectedLines == LinesToShow.BOTH) {
+        Object.entries(incomesPerCountries)
+            .filter(([key]) => selectedCountries.has(key))
+            .forEach(([key, value]) => {
+                svg.append("path")
+                    .datum(value)
+                    .attr("d", tsAvgInc)
+                    .attr("stroke", countriesMap[key].color)
+                    .attr("stroke-width", 1)
+                    .attr("fill", "none");
+            });
+    // }
 
     /****** plot gini index line ******/
     let giniIndexPerCountries = {};
@@ -187,7 +200,8 @@ async function processTSVFiles() {
         .y((d) => yGiniIndex(d.gini_index));
 
     // .filter(([key, value]) => key == 'FR') // to filter only for France
-    Object.entries(giniIndexPerCountries)
+    // if (selectedLines == LinesToShow.GINI || selectedLines == LinesToShow.BOTH) {
+        Object.entries(giniIndexPerCountries)
         .filter(([key]) => selectedCountries.has(key))
         .forEach(([key, value]) => {
             svg.append("path")
@@ -198,6 +212,7 @@ async function processTSVFiles() {
                 .attr("fill", "none")
                 .attr("stroke-dasharray", "5,5");
         });
+    // }
 
     // just for info: min and max years for average & gini tsv files
     let min = d3.min(incAvgData, (d) => d.year);

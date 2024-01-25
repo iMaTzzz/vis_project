@@ -26,3 +26,8 @@ body {
 #searchBar {
     margin-bottom: 10px;
 }
+
+#showLinesContainer {
+    height: fit-content;
+    margin-bottom: 20px;
+}
