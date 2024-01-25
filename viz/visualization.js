@@ -125,7 +125,6 @@ async function processTSVFiles() {
     /**
      * function called every dynamic change to update the display
      */
-    let svg;
     const updateDisplayedData = () => {
         console.log('selectedCountries--');
         console.log(selectedCountries);
@@ -149,7 +148,7 @@ async function processTSVFiles() {
         // Remove the previous SVG element (if it exists)
         d3.select("svg").remove();
 
-        svg = d3
+        let svg = d3
             .select("#svgContainer")
             .append("div")
             .style("margin-left", "20px")
