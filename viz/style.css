@@ -14,6 +14,31 @@ body {
 #svgContainer {
     margin-right: 20px;
 }
+#legendContainer {
+    margin-right: 20px;
+    width: 700px;
+    max-height: 700px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+#legendCountryContainer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+#rectangle {
+    width: 40px;
+    height: 20px;
+    margin-right: 5px;
+    flex-shrink: 0;
+}
+span {
+    font-size: 14px; /* Adjust font size of country name */
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide overflow text */
+    text-overflow: ellipsis; /* Display ellipsis for overflow text */
+}
 #formContainer {
     width: 100%;
 }

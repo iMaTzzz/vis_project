@@ -44,7 +44,6 @@ async function processTSVFiles() {
     const checkboxes = document.querySelectorAll("input[type='checkbox']");
     checkboxes.forEach((checkbox) => {
         checkbox.addEventListener("change", (event) => {
-            console.log('---- dans event list- ---')
             const countryCode = event.target.value;
             if (event.target.checked) {
                 selectedCountries.add(countryCode); // Add country code if checkbox is checked
@@ -65,7 +64,6 @@ async function processTSVFiles() {
             checkbox.checked = false; // Uncheck all checkboxes
         });
         selectedCountries.clear(); // Clear selected countries set
-        console.log(selectedCountries); // Log selected countries (should be empty)
         updateDisplayedData();
     });
 
@@ -144,7 +142,6 @@ async function processTSVFiles() {
             countriesColorMap[countryCode] = color(i);
             i++;
         })
-        console.log(countriesColorMap);
         const filtered_incAvgData = incAvgData.filter((d) =>
             selectedCountries.has(d.code)
         );
@@ -266,6 +263,7 @@ async function processTSVFiles() {
         }
 
         // Add legend
+        // Simple line = Average income 
         if (selectedLines == LinesToShow.BOTH) {
             const legend = svg
                 .append("g")
@@ -282,6 +280,7 @@ async function processTSVFiles() {
                 .attr("x2", -220)
                 .attr("y2", -5);
 
+        // Dashed line = Gini Index 
             legend.append("text").attr("x", 200).text("Gini Index");
             legend
                 .append("line")
@@ -293,6 +292,32 @@ async function processTSVFiles() {
                 .attr("x2", 180)
                 .attr("y2", -5);
         }
+        // Clear legend first 
+        const legendContainer = document.getElementById("legendContainer");
+        legendContainer.innerHTML = ""; // Remove all child nodes
+        // Create legend to assign each color to the correct country
+        Object.entries(countriesColorMap).forEach((d) => {
+            const countryCode = d[0];
+            const countryColor = d[1];
+            console.log(countryCode);
+            console.log(countriesMap[countryCode].name);
+            const legendCountryContainer = document.createElement("div");
+            legendCountryContainer.id = "legendCountryContainer";
+
+            // Create a colored rectangle
+            const colorRectangle = document.createElement("div");
+            colorRectangle.id = "rectangle";
+            colorRectangle.style.backgroundColor = countryColor;
+            legendCountryContainer.appendChild(colorRectangle);
+
+            // Create a span for the country name
+            const countryNameSpan = document.createElement("span");
+            countryNameSpan.textContent = countriesMap[countryCode].name;
+            legendCountryContainer.appendChild(countryNameSpan);
+
+            legendContainer.appendChild(legendCountryContainer);
+
+        })
     }
 
     updateDisplayedData();
