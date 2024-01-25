@@ -229,7 +229,7 @@ async function processTSVFiles() {
 
         if (selectedLines == LinesToShow.AVG_INC || selectedLines == LinesToShow.BOTH) {
             svg.append("text")
-                .text("Average income (€)")
+                .text("Average income")
                 .attr(
                     "transform",
                     `translate(-80, 220) rotate(-90)`
