@@ -234,43 +234,44 @@ async function processTSVFiles() {
                     .attr("stroke-dasharray", "5,5");
             });
         }
+
+        // Add legend
+        const legend = svg
+            .append("g")
+            .attr("class", "legend")
+            .attr("transform", `translate(${width / 2 - 60},${height + 75})`);
+
+        legend.append("text").attr("x", -200).text("Average Income");
+
+        legend
+            .append("line")
+            .style("stroke", "black")
+            .style("stroke-width", 2)
+            .attr("x1", -250)
+            .attr("y1", -5)
+            .attr("x2", -220)
+            .attr("y2", -5);
+
+        legend.append("text").attr("x", 200).text("Gini Index");
+
+        legend
+            .append("line")
+            .style("stroke-dasharray", "3, 3")
+            .style("stroke", "black")
+            .style("stroke-width", 2)
+            .attr("x1", 150)
+            .attr("y1", -5)
+            .attr("x2", 180)
+            .attr("y2", -5);
     }
 
     updateDisplayedData();
-
-    // Add legend
-    const legend = svg
-        .append("g")
-        .attr("class", "legend")
-        .attr("transform", `translate(${width / 2 - 60},${height + 75})`);
-
-    legend.append("text").attr("x", -200).text("Average Income");
-
-    legend
-        .append("line")
-        .style("stroke", "black")
-        .style("stroke-width", 2)
-        .attr("x1", -250)
-        .attr("y1", -5)
-        .attr("x2", -220)
-        .attr("y2", -5);
-
-    legend.append("text").attr("x", 200).text("Gini Index");
-
-    legend
-        .append("line")
-        .style("stroke-dasharray", "3, 3")
-        .style("stroke", "black")
-        .style("stroke-width", 2)
-        .attr("x1", 150)
-        .attr("y1", -5)
-        .attr("x2", 180)
-        .attr("y2", -5);
 }
 
 processTSVFiles();
 
 window.addEventListener("load", () => {
+
     // Filter countries based on search input
     document.getElementById("searchBar").addEventListener("input", (event) => {
         var searchText = event.target.value.toLowerCase();
