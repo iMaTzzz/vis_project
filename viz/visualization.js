@@ -1,3 +1,5 @@
+const selectedCountries = new Set();
+
 var margin = { top: 100, right: 100, bottom: 100, left: 100 },
     width = 1000 - margin.left - margin.right,
     height = 800 - margin.top - margin.bottom;
@@ -43,25 +45,35 @@ async function processTSVFiles() {
         checkboxContainer.id = "checkboxContainer";
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
-        checkbox.id = `country${d.code}`;
-        checkbox.name = "countries[]";
+        checkbox.name = d.name;
         checkbox.value = d.code;
 
         const label = document.createElement("label");
-        label.htmlFor = `country${d.code}`;
+        label.htmlFor = d.code;
         label.appendChild(document.createTextNode(d.name));
 
         checkboxContainer.appendChild(checkbox);
         checkboxContainer.appendChild(label);
-        checkboxContainer.appendChild(document.createElement("br"));
         form.appendChild(checkboxContainer);
     });
 
-    console.log("countriesMap-----");
-    console.log(countriesMap);
+    // Add event listeners to checkboxes inside formContainer
+    const checkboxes = document.querySelectorAll("input[type='checkbox']");
+    checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", (event) => {
+            const countryCode = event.target.value;
+            if (event.target.checked) {
+                selectedCountries.add(countryCode); // Add country code if checkbox is checked
+            } else {
+                selectedCountries.delete(countryCode); // Delete country code if checkbox is unchecked
+            }
+        });
+    });
 
-    // let selectedCountries = countriesData.map(d => d.code); // for all countries
-    let selectedCountries = ["AR", "CA", "FR"]; // for only a few ones
+    // Check the checkbox for France by default
+    const franceCheckbox = document.querySelector("#checkboxContainer input[value='FR']");
+    franceCheckbox.checked = true;
+    selectedCountries.add("FR"); // Add France to selected countries
 
     const giniIndexData = await d3.tsv("../data/income_gini.tsv", (d) => ({
         code: d.country,
@@ -75,18 +87,18 @@ async function processTSVFiles() {
         average: +d.average,
     }));
     const filtered_incAvgData = incAvgData.filter((d) =>
-        selectedCountries.includes(d.code)
+        selectedCountries.has(d.code)
     );
 
     let concatenatedIncAndGini = incAvgData.concat(giniIndexData);
     let filtered_concatenated_both_data = concatenatedIncAndGini.filter((d) =>
-        selectedCountries.includes(d.code)
+        selectedCountries.has(d.code)
     );
 
-    x.domain(d3.extent(filtered_concatenated_both_data, (d) => d.year));
+    x.domain(d3.extent(filtered_concatenated_both_data.length ? filtered_concatenated_both_data : [1900, 2000], (d) => d.year));
     // x.domain([1965, 2020]); // for FR
 
-    yAvgInc.domain(d3.extent(filtered_incAvgData, (d) => d.average));
+    yAvgInc.domain(d3.extent(filtered_incAvgData.length ? filtered_incAvgData : [0, 10000], (d) => d.average));
 
     // year x-axis
     var xAxis = d3.axisBottom(x).tickFormat(d3.format("d"));
@@ -98,7 +110,7 @@ async function processTSVFiles() {
     var yAxis = d3.axisLeft(yAvgInc);
     svg.append("g").call(yAxis);
 
-    let maxAbsYear = x(d3.max(filtered_concatenated_both_data, (d) => d.year));
+    let maxAbsYear = x(d3.max(filtered_concatenated_both_data.length ? filtered_concatenated_both_data : [1900, 2000], (d) => d.year));
 
     // gini index (right) y-axis
     var yAxis = d3.axisRight(yGiniIndex);
@@ -150,7 +162,7 @@ async function processTSVFiles() {
         .y((d) => yAvgInc(d.average));
 
     Object.entries(incomesPerCountries)
-        .filter(([key]) => selectedCountries.includes(key))
+        .filter(([key]) => selectedCountries.has(key))
         .forEach(([key, value]) => {
             svg.append("path")
                 .datum(value)
@@ -176,7 +188,7 @@ async function processTSVFiles() {
 
     // .filter(([key, value]) => key == 'FR') // to filter only for France
     Object.entries(giniIndexPerCountries)
-        .filter(([key]) => selectedCountries.includes(key))
+        .filter(([key]) => selectedCountries.has(key))
         .forEach(([key, value]) => {
             svg.append("path")
                 .datum(value)
@@ -238,6 +250,9 @@ window.addEventListener("load", () => {
         checkboxContainers.forEach(function (checkboxContainer) {
             const label = checkboxContainer.querySelector("label");
             const countryName = label.innerText.toLowerCase();
+
+            const checkbox = checkboxContainer.querySelector("input");
+            const countryCode = checkbox.value;
 
             // Check if the country name contains the search text
             if (countryName.includes(searchText)) {
