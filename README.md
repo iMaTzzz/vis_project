@@ -1,3 +1,5 @@
+# Project made by Maria Stella Villa Avila, Hugo Demeyere and Matteo Sciascia
+
 # 2019-wid
 
 Extracts of the [World Inequality Database](https://wid.world/).
