@@ -132,9 +132,9 @@ async function processTSVFiles() {
      * function called every dynamic change to update the display
      */
     const updateDisplayedData = () => {
-        const color = d3.scaleSequential(
+        const color = d3.scaleOrdinal(
             [0, selectedCountries.size],
-            d3.interpolateRainbow
+            d3.schemeTableau10
         );
         const countriesColorMap = {}
         let i = 0;

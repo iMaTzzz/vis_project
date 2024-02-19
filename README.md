@@ -27,8 +27,5 @@ The attributes present in the tables are:
 * **share** the share of the total income captured by this [low, high] quantile
 * **cumul** the cumulative share of the quantiles, i.e. the share of [0., high]
 
-## Sample visualizations
-
-* **histogram.html** a basic histogram showing how to select a specific year, and how to use **low**, **high**, **width** and **share**
-* **cdf.html** a cumulative distribution function plot showing a use for **cumul**
-* **time.html** a time series visualization
+## Main visualization
+* **main.html**: Trends in income inequality: Average income and Wealth Distribution Comparison
